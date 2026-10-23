@@ -1,0 +1,18 @@
+:root { --bg: #fff; --fg: #1c1c1c; --card: #f3f3f3; --accent: #2e7d32; }
+@media (prefers-color-scheme: dark) { :root { --bg: #151515; --fg: #eee; --card: #242424; --accent: #66bb6a; } }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+header { padding: 12px 16px; }
+h1 { margin: 0 0 8px; font-size: 1.2rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.controls label { display: flex; gap: 6px; align-items: center; }
+.btn { background: var(--accent); color: #fff; border: 0; padding: 8px 14px; border-radius: 6px; cursor: pointer; font: inherit; }
+select, input[type=number] { padding: 6px; font: inherit; max-width: 100%; }
+input[type=number] { width: 80px; }
+#stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 0 16px 8px; }
+.card { background: var(--card); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; }
+.card span { font-size: .75rem; opacity: .7; }
+.card b { font-size: 1.05rem; }
+#legend { padding: 0 16px 8px; font-size: .85rem; display: flex; gap: 6px; align-items: center; }
+#legend i { display: inline-block; width: 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, hsl(220,85%,50%), hsl(110,85%,50%), hsl(0,85%,50%)); }
+#map { height: 60vh; min-height: 320px; }
