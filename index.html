@@ -11,18 +11,36 @@
   <header>
     <h1>🦖 T-Rex Track Viewer</h1>
     <div class="controls">
-      <label class="btn">GPX chuno <input id="file" type="file" accept=".gpx,application/gpx+xml,text/xml" hidden></label>
+      <label class="btn">GPX chuno <input id="file" type="file" accept=".gpx,application/gpx+xml,text/xml" multiple hidden></label>
+      <label class="btn alt">Gadgetbridge DB <input id="db" type="file" accept=".db,.sqlite,application/octet-stream" hidden></label>
       <button id="demo" class="btn" type="button">Demo track</button>
       <label>Sport <select id="sport"></select></label>
       <label>Weight (kg) <input id="weight" type="number" value="70" min="20" max="250"></label>
+      <label>Max HR <input id="maxhr" type="number" value="190" min="120" max="230"></label>
     </div>
+    <div id="msg" role="status"></div>
   </header>
   <div id="stats"></div>
   <div id="legend" hidden>Heart rate: <span id="lo"></span> bpm <i></i> <span id="hi"></span> bpm</div>
   <div id="map"></div>
+  <main>
+    <section id="zonesBox" hidden><h2>Heart-rate zones</h2><div id="zones"></div></section>
+    <section id="charts">
+      <div class="chart" id="boxHr" hidden><h2>Heart rate (bpm)</h2><canvas id="chHr"></canvas></div>
+      <div class="chart" id="boxSpeed" hidden><h2 id="speedTitle">Pace</h2><canvas id="chSpeed"></canvas></div>
+      <div class="chart" id="boxEle" hidden><h2>Elevation (m)</h2><canvas id="chEle"></canvas></div>
+    </section>
+    <section id="gbBox" hidden><h2>Gadgetbridge workouts</h2><ul id="gbList" class="list"></ul></section>
+    <section><h2>History</h2><ul id="history" class="list"></ul><p id="historyEmpty" class="muted">Abhi koi saved workout nahi.</p></section>
+  </main>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
   <script src="src/sports.js"></script>
   <script src="src/gpx.js"></script>
+  <script src="src/analysis.js"></script>
+  <script src="src/charts.js"></script>
+  <script src="src/store.js"></script>
+  <script src="src/gbdb.js"></script>
   <script src="src/app.js"></script>
 </body>
 </html>

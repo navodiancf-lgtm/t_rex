@@ -33,12 +33,18 @@
     return { points: points, typeText: typeEl ? typeEl.textContent : '' };
   }
 
+  // Points imported from a watch database have heart rate but no coordinates.
+  function hasCoord(p) {
+    return typeof p.lat === 'number' && typeof p.lon === 'number' && isFinite(p.lat) && isFinite(p.lon);
+  }
+
   function stats(points, weightKg, met) {
-    var dist = 0, gain = 0, hrSum = 0, hrN = 0, hrMax = 0, hrMin = Infinity;
+    var dist = 0, gain = 0, hrSum = 0, hrN = 0, hrMax = 0, hrMin = Infinity, hasGps = false;
     for (var i = 0; i < points.length; i++) {
       var p = points[i];
+      if (hasCoord(p)) hasGps = true;
       if (i > 0) {
-        dist += haversine(points[i - 1], p);
+        if (hasCoord(points[i - 1]) && hasCoord(p)) dist += haversine(points[i - 1], p);
         if (p.ele != null && points[i - 1].ele != null && p.ele > points[i - 1].ele) gain += p.ele - points[i - 1].ele;
       }
       if (p.hr != null && isFinite(p.hr) && p.hr > 0) {
@@ -49,6 +55,7 @@
     var seconds = t0 != null && t1 != null ? (t1 - t0) / 1000 : 0;
     var km = dist / 1000;
     return {
+      hasGps: hasGps,
       distanceKm: km,
       seconds: seconds,
       paceSecPerKm: km > 0 && seconds > 0 ? seconds / km : null,
@@ -76,7 +83,7 @@
     return (h ? h + ':' + pad(m) : m) + ':' + pad(sec);
   }
 
-  var api = { haversine: haversine, parseDoc: parseDoc, stats: stats, hrColor: hrColor, fmtDuration: fmtDuration };
+  var api = { haversine: haversine, parseDoc: parseDoc, stats: stats, hasCoord: hasCoord, hrColor: hrColor, fmtDuration: fmtDuration };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Gpx = api;
 })(typeof window !== 'undefined' ? window : globalThis);

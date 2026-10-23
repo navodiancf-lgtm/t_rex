@@ -16,3 +16,20 @@ input[type=number] { width: 80px; }
 #legend { padding: 0 16px 8px; font-size: .85rem; display: flex; gap: 6px; align-items: center; }
 #legend i { display: inline-block; width: 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, hsl(220,85%,50%), hsl(110,85%,50%), hsl(0,85%,50%)); }
 #map { height: 60vh; min-height: 320px; }
+.btn.alt { background: #455a64; }
+#msg { min-height: 1.2em; margin-top: 6px; font-size: .85rem; opacity: .85; }
+main { padding: 8px 16px 24px; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+main > section[hidden], .chart[hidden] { display: none; }
+h2 { font-size: .95rem; margin: 0 0 6px; }
+#charts { display: grid; gap: 12px; }
+canvas { width: 100%; height: 140px; display: block; }
+.zone { display: grid; grid-template-columns: 100px 1fr 64px; gap: 8px; align-items: center; font-size: .8rem; margin: 4px 0; }
+.zone .bar { background: var(--card); border-radius: 4px; height: 14px; overflow: hidden; }
+.zone .bar i { display: block; height: 100%; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; gap: 8px; align-items: center; padding: 8px; border-radius: 8px; background: var(--card); margin-bottom: 6px; cursor: pointer; }
+.list li:hover { outline: 2px solid var(--accent); }
+.list li .grow { flex: 1; min-width: 0; }
+.list li small { display: block; opacity: .7; }
+.list li button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1rem; }
+.muted { opacity: .6; font-size: .85rem; }
