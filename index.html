@@ -31,8 +31,14 @@
       <div class="chart" id="boxEle" hidden><h2>Elevation (m)</h2><canvas id="chEle"></canvas></div>
     </section>
     <section id="gbBox" hidden><h2>Gadgetbridge workouts</h2><ul id="gbList" class="list"></ul></section>
-    <section><h2>History</h2><ul id="history" class="list"></ul><p id="historyEmpty" class="muted">Abhi koi saved workout nahi.</p></section>
+    <section><h2>History</h2><button id="cmpBtn" class="btn alt" type="button" disabled>Compare (0)</button><ul id="history" class="list"></ul><p id="historyEmpty" class="muted">Abhi koi saved workout nahi.</p></section>
   </main>
+  <section id="cmpBox" hidden>
+    <h2>Compare</h2>
+    <div id="cmpMap"></div>
+    <div class="table-wrap"><table id="cmpTable" class="cmp"></table></div>
+    <button id="cmpClose" class="btn alt" type="button">Band karo</button>
+  </section>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
   <script src="src/sports.js"></script>

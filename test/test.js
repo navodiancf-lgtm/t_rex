@@ -84,6 +84,17 @@ function serve() {
   ]);
   await page.waitForFunction(() => document.querySelectorAll('#history li').length === 2);
 
+  // 4b. Compare two saved workouts side by side.
+  await page.locator('#history [data-cmp]').nth(0).check();
+  await page.locator('#history [data-cmp]').nth(1).check();
+  await page.click('#cmpBtn');
+  await page.waitForSelector('#cmpTable tbody tr');
+  assert.strictEqual(await page.locator('#cmpTable thead th').count(), 3, 'label column + 2 workouts');
+  assert.strictEqual(await page.locator('#cmpBox').isVisible(), true);
+  assert.ok(await page.locator('#cmpMap path.leaflet-interactive').count() >= 2, 'one polyline per workout');
+  await page.click('#cmpClose');
+  assert.strictEqual(await page.locator('#cmpBox').isVisible(), false);
+
   // 5. A GPX without HR gets HR from a Gadgetbridge DB (schema built in-page with sql.js).
   await page.setInputFiles('#file', { name: 'nohr.gpx', mimeType: 'text/xml', buffer: Buffer.from(noHr) });
   await page.waitForFunction(() => document.querySelector('.card:nth-child(5) b').innerText === '–');

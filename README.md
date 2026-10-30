@@ -9,6 +9,7 @@ Koi build step nahi: `index.html` browser mein kholo (ya `python3 -m http.server
 - Distance, time, pace/speed, elevation gain, avg/max HR, estimated calories
 - **Heart-rate zones** (Z1-Z5, % of Max HR) aur **charts**: heart rate, pace/speed, elevation
 - **History**: har upload browser mein (IndexedDB) save hota hai, baad mein click karke dobara khol sakte ho. Ek saath kai GPX upload ho sakti hain.
+- **Compare**: History mein 2 ya zyada workouts ka checkbox chuno, phir **Compare** dabao. Routes ek map par alag rangon mein, aur stats ki side-by-side table dikhegi.
 - **Gadgetbridge DB import**: `Gadgetbridge.db` upload karo. GPX mein HR missing ho to DB se bhar jati hai,
   aur DB ke workouts (sirf heart rate, bina GPS) bhi khol sakte ho.
 - 18 sports (Running, Trail, Hiking, Trekking, Cycling, MTB, Swimming, Cricket, Football, Badminton, ...).

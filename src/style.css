@@ -33,3 +33,12 @@ canvas { width: 100%; height: 140px; display: block; }
 .list li small { display: block; opacity: .7; }
 .list li button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1rem; }
 .muted { opacity: .6; font-size: .85rem; }
+.list li input[type=checkbox] { margin: 0; width: 18px; height: 18px; flex: none; }
+#cmpBox { padding: 8px 16px 24px; }
+#cmpBox h2 { margin-top: 8px; }
+#cmpMap { height: 360px; border-radius: 8px; margin-bottom: 12px; }
+.table-wrap { overflow-x: auto; margin-bottom: 12px; }
+table.cmp { border-collapse: collapse; width: 100%; font-size: .85rem; }
+table.cmp th, table.cmp td { padding: 6px 8px; border-bottom: 1px solid var(--card); text-align: left; white-space: nowrap; }
+table.cmp td:first-child { opacity: .7; }
+table.cmp i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }

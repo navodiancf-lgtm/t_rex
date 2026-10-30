@@ -1,8 +1,11 @@
 (function () {
+  function addTiles(m) {
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(m);
+  }
   var map = L.map('map').setView([20.59, 78.96], 5);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+  addTiles(map);
   var layer = L.layerGroup().addTo(map);
 
   var current = null; // { id, name, sportId, points }
@@ -40,11 +43,16 @@
     if (st.hrMax != null) { $('lo').textContent = Math.round(st.hrMin); $('hi').textContent = Math.round(st.hrMax); }
   }
 
-  function drawStats(st, sport) {
-    var speedLabel = sport.metric === 'pace' ? 'Pace' : 'Speed';
-    var speedVal = !st.hasGps ? '–' : sport.metric === 'pace'
+  function fmtSpeed(st, sport) {
+    if (!st.hasGps) return '–';
+    return sport.metric === 'pace'
       ? (st.paceSecPerKm ? Gpx.fmtDuration(st.paceSecPerKm) + ' /km' : '–')
       : (st.speedKmh ? st.speedKmh.toFixed(1) + ' km/h' : '–');
+  }
+
+  function drawStats(st, sport) {
+    var speedLabel = sport.metric === 'pace' ? 'Pace' : 'Speed';
+    var speedVal = fmtSpeed(st, sport);
     var cards = [
       ['Distance', st.hasGps ? st.distanceKm.toFixed(2) + ' km' : '–'],
       ['Time', Gpx.fmtDuration(st.seconds)],
@@ -99,6 +107,68 @@
     drawCharts(current.points, p.sport);
   }
 
+  // ---- Compare (multi-select from history) ----
+  var selected = new Set();
+  var COLORS = ['#e53935', '#1e88e5', '#43a047', '#fb8c00', '#8e24aa', '#00897b'];
+  var cmpMap = null, cmpLayer = null;
+
+  function updateCompareBtn() {
+    $('cmpBtn').disabled = selected.size < 2;
+    $('cmpBtn').textContent = 'Compare (' + selected.size + ')';
+  }
+
+  function compare() {
+    var p = params();
+    Promise.all(Array.from(selected).map(function (id) { return Store.get(id); })).then(function (recs) {
+      var rows = recs.filter(Boolean).map(function (r, i) {
+        var sport = Sports.byId(r.sportId), pts = Store.unpack(r.points);
+        return { rec: r, pts: pts, sport: sport, st: Gpx.stats(pts, p.weight, sport.met), color: COLORS[i % COLORS.length] };
+      });
+      $('cmpBox').hidden = false;
+      drawCompareMap(rows);
+      drawCompareTable(rows);
+      $('cmpBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  function drawCompareTable(rows) {
+    var head = '<tr><th></th>' + rows.map(function (r) {
+      return '<th><i style="background:' + r.color + '"></i>' + esc(r.rec.name) + '</th>';
+    }).join('') + '</tr>';
+    var line = function (label, fn) {
+      return '<tr><td>' + label + '</td>' + rows.map(function (r) { return '<td>' + fn(r) + '</td>'; }).join('') + '</tr>';
+    };
+    $('cmpTable').innerHTML = '<thead>' + head + '</thead><tbody>' + [
+      line('Sport', function (r) { return r.sport.icon + ' ' + r.sport.label; }),
+      line('Date', function (r) { return r.rec.startTime ? new Date(r.rec.startTime).toLocaleString() : '–'; }),
+      line('Distance', function (r) { return r.st.hasGps ? r.st.distanceKm.toFixed(2) + ' km' : '–'; }),
+      line('Time', function (r) { return Gpx.fmtDuration(r.st.seconds); }),
+      line('Speed / Pace', function (r) { return fmtSpeed(r.st, r.sport); }),
+      line('Elevation gain', function (r) { return Math.round(r.st.elevationGain) + ' m'; }),
+      line('Avg HR', function (r) { return r.st.hrAvg ? Math.round(r.st.hrAvg) + ' bpm' : '–'; }),
+      line('Max HR', function (r) { return r.st.hrMax ? r.st.hrMax + ' bpm' : '–'; }),
+      line('Calories (est.)', function (r) { return r.st.calories != null ? r.st.calories + ' kcal' : '–'; })
+    ].join('') + '</tbody>';
+  }
+
+  function drawCompareMap(rows) {
+    if (!cmpMap) {
+      cmpMap = L.map('cmpMap').setView([20.59, 78.96], 5);
+      addTiles(cmpMap);
+      cmpLayer = L.layerGroup().addTo(cmpMap);
+    }
+    cmpMap.invalidateSize();
+    cmpLayer.clearLayers();
+    var all = [];
+    rows.forEach(function (r) {
+      var ll = r.pts.filter(Gpx.hasCoord).map(function (p) { return [p.lat, p.lon]; });
+      if (!ll.length) return;
+      all = all.concat(ll);
+      L.polyline(ll, { color: r.color, weight: 4, opacity: 0.85 }).bindTooltip(esc(r.rec.name)).addTo(cmpLayer);
+    });
+    if (all.length) cmpMap.fitBounds(all, { padding: [30, 30] });
+  }
+
   // ---- History (IndexedDB) ----
   function persist(w) {
     var p = params(), st = Gpx.stats(w.points, p.weight, Sports.byId(w.sportId).met);
@@ -114,11 +184,13 @@
   function refreshHistory() {
     return Store.list().then(function (items) {
       items.sort(function (a, b) { return b.startTime - a.startTime; });
+      selected = new Set(items.map(function (it) { return it.id; }).filter(function (id) { return selected.has(id); }));
+      updateCompareBtn();
       $('historyEmpty').hidden = items.length > 0;
       $('history').innerHTML = items.map(function (it) {
         var sp = Sports.byId(it.sportId), date = it.startTime ? new Date(it.startTime).toLocaleString() : '';
         var km = it.summary.distanceKm != null ? it.summary.distanceKm.toFixed(2) + ' km · ' : '';
-        return '<li data-id="' + esc(it.id) + '"><span>' + sp.icon + '</span><div class="grow"><b>' + esc(it.name) +
+        return '<li data-id="' + esc(it.id) + '"><input type="checkbox" data-cmp="1" aria-label="Compare"' + (selected.has(it.id) ? ' checked' : '') + '><span>' + sp.icon + '</span><div class="grow"><b>' + esc(it.name) +
           '</b><small>' + esc(date) + ' · ' + km + Gpx.fmtDuration(it.summary.seconds) +
           '</small></div><button type="button" data-del="1" title="Delete" aria-label="Delete">🗑️</button></li>';
       }).join('');
@@ -127,6 +199,7 @@
 
   $('history').addEventListener('click', function (e) {
     var li = e.target.closest('li'); if (!li) return;
+    if (e.target.matches('[data-cmp]')) return;
     var id = li.getAttribute('data-id');
     if (e.target.closest('[data-del]')) { Store.remove(id).then(refreshHistory); return; }
     Store.get(id).then(function (r) {
@@ -135,6 +208,15 @@
       sportSel.value = r.sportId; msg(r.name); render();
     });
   });
+
+  $('history').addEventListener('change', function (e) {
+    if (!e.target.matches('[data-cmp]')) return;
+    var id = e.target.closest('li').getAttribute('data-id');
+    if (e.target.checked) selected.add(id); else selected.delete(id);
+    updateCompareBtn();
+  });
+  $('cmpBtn').addEventListener('click', compare);
+  $('cmpClose').addEventListener('click', function () { $('cmpBox').hidden = true; });
 
   // ---- Loading ----
   function toWorkout(parsed, name) {
